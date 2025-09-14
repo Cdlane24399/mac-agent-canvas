@@ -24,13 +24,17 @@ export default function InlineToolWrapper({
     <motion.div
       initial={{ opacity: 0, scale: 0.95, y: 20 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
-      className="my-4 border border-border rounded-2xl overflow-hidden bg-card shadow-lg"
+      className="my-3 border border-border rounded-xl overflow-hidden bg-card shadow-sm max-w-2xl"
     >
       {/* Tool Header */}
-      <div className="flex items-center justify-between p-3 bg-muted/50 border-b border-border">
+      <div className="flex items-center justify-between p-2 bg-muted/30 border-b border-border">
         <div className="flex items-center gap-2">
           {icon}
-          <span className="font-medium text-foreground">{title}</span>
+          <span className="text-sm font-medium text-foreground">AI Agent: {title}</span>
+          <div className="flex items-center gap-1 ml-2">
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+            <span className="text-xs text-muted-foreground">Working...</span>
+          </div>
         </div>
         
         <div className="flex items-center gap-1">
@@ -38,7 +42,7 @@ export default function InlineToolWrapper({
             variant="ghost"
             size="sm"
             onClick={() => setIsMinimized(!isMinimized)}
-            className="h-7 w-7 p-0"
+            className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
           >
             {isMinimized ? (
               <Maximize2 className="w-3 h-3" />
@@ -46,17 +50,6 @@ export default function InlineToolWrapper({
               <Minimize2 className="w-3 h-3" />
             )}
           </Button>
-          
-          {onClose && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onClose}
-              className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground"
-            >
-              <X className="w-3 h-3" />
-            </Button>
-          )}
         </div>
       </div>
 
@@ -70,7 +63,7 @@ export default function InlineToolWrapper({
         transition={{ duration: 0.3 }}
         className="overflow-hidden"
       >
-        <div className="p-4">
+        <div className="p-3 max-h-64 overflow-hidden">
           {children}
         </div>
       </motion.div>

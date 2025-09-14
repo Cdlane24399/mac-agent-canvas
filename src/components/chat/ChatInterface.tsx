@@ -5,11 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import AICallout from "@/components/ai/AICallout";
 import InlineToolWrapper from "./InlineToolWrapper";
-import TerminalTool from "@/components/tools/TerminalTool";
-import EditorTool from "@/components/tools/EditorTool";
-import BrowserTool from "@/components/tools/BrowserTool";
-import SearchTool from "@/components/tools/SearchTool";
-import FilesTool from "@/components/tools/FilesTool";
+import AgentTerminalTool from "@/components/tools/AgentTerminalTool";
+import AgentEditorTool from "@/components/tools/AgentEditorTool";
+import AgentBrowserTool from "@/components/tools/AgentBrowserTool";
+import AgentSearchTool from "@/components/tools/AgentSearchTool";
+import AgentFilesTool from "@/components/tools/AgentFilesTool";
 import type { AIMessage } from "@/types";
 
 interface ActiveTool {
@@ -39,7 +39,7 @@ export default function ChatInterface() {
     {
       id: "1",
       type: "assistant", 
-      content: "Hello! I'm your AI assistant with integrated tools. I can help you with:\n\n🖥️ **Terminal** - Execute commands\n💻 **Code Editor** - Edit files and code\n🌐 **Web Browser** - Browse websites\n🔍 **Web Search** - Search for information\n📁 **File Manager** - Manage your files\n\nJust tell me what you'd like to do and I'll open the appropriate tool for you!",
+      content: "Hello! I'm your autonomous AI agent. I can help you complete complex tasks by intelligently using multiple tools in sequence:\n\n🤖 **Agentic Workflows:**\n• Website/App Development - I'll research, code, and test automatically\n• Research Projects - I'll search, browse, compile, and organize information\n• Code Analysis - I'll examine files, analyze code, run diagnostics\n• Deployment Tasks - I'll build, deploy, and verify applications\n\n📋 **Available Tools:**\n🖥️ Terminal | 💻 Code Editor | 🌐 Browser | 🔍 Search | 📁 Files\n\nJust describe what you want to accomplish, and I'll autonomously execute the complete workflow using whatever tools are needed. Try something like:\n• \"Build me a modern website\"\n• \"Research AI development trends\" \n• \"Deploy my application\"\n• \"Analyze my code for issues\"",
       timestamp: new Date()
     }
   ]);
@@ -135,22 +135,17 @@ export default function ChatInterface() {
   };
 
   const renderToolComponent = (tool: ActiveTool) => {
-    const commonProps = {
-      isActive: true,
-      onMessage: undefined
-    };
-
     switch (tool.type) {
       case 'terminal':
-        return <TerminalTool {...commonProps} />;
+        return <AgentTerminalTool />;
       case 'editor':
-        return <EditorTool {...commonProps} />;
+        return <AgentEditorTool />;
       case 'browser':
-        return <BrowserTool {...commonProps} />;
+        return <AgentBrowserTool />;
       case 'search':
-        return <SearchTool {...commonProps} />;
+        return <AgentSearchTool />;
       case 'files':
-        return <FilesTool {...commonProps} />;
+        return <AgentFilesTool />;
       default:
         return null;
     }
