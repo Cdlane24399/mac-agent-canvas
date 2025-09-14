@@ -51,24 +51,25 @@ export default function ToolPanel({ activeTool, onClose }: ToolPanelProps) {
       initial={{ opacity: 0, x: 300 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 300 }}
-      className="w-96 h-full bg-background border-l border-border flex flex-col"
+      className="w-[480px] h-full bg-background flex flex-col p-6"
     >
-      {/* Tool Panel Header */}
-      <div className="flex items-center justify-between p-4 border-b border-border">
-        <h3 className="font-semibold text-foreground">{toolNames[activeTool.type]}</h3>
-        <Button
-          onClick={onClose}
-          variant="ghost"
-          size="sm"
-          className="h-8 w-8 p-0"
-        >
-          <X className="w-4 h-4" />
-        </Button>
-      </div>
+      {/* Tool Container */}
+      <div className="h-full bg-background rounded-2xl border border-border flex flex-col overflow-hidden">
+        {/* Tool Header */}
+        <div className="flex items-center justify-between p-4">
+          <h3 className="font-semibold text-foreground">{toolNames[activeTool.type]}</h3>
+          <Button
+            onClick={onClose}
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0"
+          >
+            <X className="w-4 h-4" />
+          </Button>
+        </div>
 
-      {/* Tool Content */}
-      <div className="flex-1 p-4">
-        <div className="h-full bg-background rounded-2xl border border-border overflow-hidden">
+        {/* Tool Content */}
+        <div className="flex-1 overflow-hidden">
           {renderToolComponent(activeTool)}
         </div>
       </div>
