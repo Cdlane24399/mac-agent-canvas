@@ -21,37 +21,33 @@ export default function InlineToolWrapper({
   const [isMinimized, setIsMinimized] = useState(defaultMinimized);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.95, y: 20 }}
-      animate={{ opacity: 1, scale: 1, y: 0 }}
-      className="my-3 border border-border rounded-xl overflow-hidden bg-card shadow-sm max-w-2xl"
-    >
-      {/* Tool Header */}
-      <div className="flex items-center justify-between p-2 bg-muted/30 border-b border-border">
-        <div className="flex items-center gap-2">
-          {icon}
-          <span className="text-sm font-medium text-foreground">AI Agent: {title}</span>
-          <div className="flex items-center gap-1 ml-2">
-            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-            <span className="text-xs text-muted-foreground">Working...</span>
-          </div>
+    <div className="my-3 max-w-2xl space-y-2">
+      {/* Tool Header Bubble */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="inline-flex items-center gap-2 px-3 py-1.5 bg-muted/50 border border-border rounded-full shadow-sm"
+      >
+        {icon}
+        <span className="text-xs font-medium text-foreground">AI Agent: {title}</span>
+        <div className="flex items-center gap-1">
+          <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
+          <span className="text-xs text-muted-foreground">Working...</span>
         </div>
         
-        <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsMinimized(!isMinimized)}
-            className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
-          >
-            {isMinimized ? (
-              <Maximize2 className="w-3 h-3" />
-            ) : (
-              <Minimize2 className="w-3 h-3" />
-            )}
-          </Button>
-        </div>
-      </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setIsMinimized(!isMinimized)}
+          className="h-5 w-5 p-0 ml-1 text-muted-foreground hover:text-foreground"
+        >
+          {isMinimized ? (
+            <Maximize2 className="w-2.5 h-2.5" />
+          ) : (
+            <Minimize2 className="w-2.5 h-2.5" />
+          )}
+        </Button>
+      </motion.div>
 
       {/* Tool Content */}
       <motion.div
@@ -63,10 +59,16 @@ export default function InlineToolWrapper({
         transition={{ duration: 0.3 }}
         className="overflow-hidden"
       >
-        <div className="p-3 max-h-64 overflow-hidden">
-          {children}
-        </div>
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="border border-border rounded-xl overflow-hidden bg-card shadow-sm"
+        >
+          <div className="p-3 max-h-64 overflow-hidden">
+            {children}
+          </div>
+        </motion.div>
       </motion.div>
-    </motion.div>
+    </div>
   );
 }
