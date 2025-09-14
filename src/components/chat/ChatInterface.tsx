@@ -243,9 +243,9 @@ export default function ChatInterface() {
       </div>
 
       {/* Message Input */}
-      <div className="p-4 border-t border-border">
-        <div className="flex items-end gap-2">
-          <div className="flex-1">
+      <div className="p-4">
+        <div className="flex items-center gap-3 max-w-2xl mx-auto">
+          <div className="flex-1 relative">
             <Textarea
               ref={textareaRef}
               value={currentMessage}
@@ -253,18 +253,22 @@ export default function ChatInterface() {
               onKeyDown={handleKeyDown}
               placeholder="Ask me to open a tool or help with a task..."
               disabled={isProcessing}
-              className="min-h-[60px] max-h-32 resize-none bg-muted border-border"
-              rows={2}
+              className="min-h-[48px] max-h-24 resize-none bg-background border-border rounded-3xl px-4 py-3 pr-12"
+              rows={1}
             />
+            {currentMessage.trim() && (
+              <Button 
+                onClick={sendMessage}
+                disabled={isProcessing}
+                size="sm"
+                className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0 bg-white hover:bg-gray-100 text-black rounded-full shadow-sm"
+              >
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 19V5M5 12L12 5L19 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </Button>
+            )}
           </div>
-          <Button 
-            onClick={sendMessage}
-            disabled={!currentMessage.trim() || isProcessing}
-            size="lg"
-            className="h-[60px] px-4"
-          >
-            <Send className="w-4 h-4" />
-          </Button>
         </div>
       </div>
     </div>
