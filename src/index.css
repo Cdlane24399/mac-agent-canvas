@@ -2,41 +2,67 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* Agentic AI Application Design System - Dark Theme with Flat Design */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Dark Theme Base Colors */
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    /* Card Components */
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    /* Elevated Components */
+    --popover: 240 5.9% 10%;
+    --popover-foreground: 0 0% 98%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* AI Accent Colors */
+    --primary: 263 70% 50%;
+    --primary-foreground: 0 0% 98%;
+    
+    /* Tool Panel Colors */
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Muted Interface Elements */
+    --muted: 240 5.9% 10%;
+    --muted-foreground: 240 5% 64.9%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Accent for Active States */
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
+    /* Error States */
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    /* Borders and Inputs */
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 263 70% 50%;
 
-    --radius: 0.5rem;
+    /* AI Tool Specific Colors */
+    --ai-glow: 263 70% 50%;
+    --tool-active: 263 70% 50%;
+    --tool-inactive: 240 5% 64.9%;
+    
+    /* Terminal Colors */
+    --terminal-bg: 240 10% 3.9%;
+    --terminal-text: 120 100% 85%;
+    
+    /* Editor Colors */
+    --editor-bg: 240 5.9% 10%;
+    --editor-selection: 263 70% 50%;
+    
+    /* Browser Colors */
+    --browser-chrome: 240 3.7% 15.9%;
+    --browser-url: 240 5% 64.9%;
+
+    /* Design System Tokens */
+    --radius: 1rem;
+    --radius-lg: 1.5rem;
 
     --sidebar-background: 0 0% 98%;
 
@@ -101,5 +127,57 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  /* AI Tool Panel Component */
+  .tool-panel {
+    @apply bg-card border border-border rounded-2xl p-6 shadow-lg;
+    @apply animate-in fade-in-0 slide-in-from-bottom-4 duration-300;
+  }
+  
+  /* AI Callout Component */
+  .ai-callout {
+    @apply bg-muted border border-border rounded-2xl p-4;
+    @apply shadow-sm border-l-4 border-l-primary;
+  }
+  
+  /* Tool Navigation States */
+  .tool-nav-active {
+    @apply bg-accent text-accent-foreground shadow-sm;
+    @apply border border-primary/20;
+  }
+  
+  .tool-nav-inactive {
+    @apply text-muted-foreground hover:text-foreground;
+    @apply hover:bg-accent/50 transition-colors duration-200;
+  }
+  
+  /* Terminal Styling */
+  .terminal-container {
+    @apply bg-card rounded-2xl border border-border overflow-hidden;
+    @apply shadow-lg;
+  }
+  
+  /* Editor Styling */
+  .editor-container {
+    @apply bg-muted rounded-2xl border border-border overflow-hidden;
+    @apply shadow-lg;
+  }
+  
+  /* Browser Chrome */
+  .browser-chrome {
+    @apply bg-muted border-b border-border px-4 py-2;
+    @apply flex items-center gap-3;
+  }
+  
+  /* Smooth Animations */
+  .slide-enter {
+    @apply animate-in slide-in-from-right-full duration-300;
+  }
+  
+  .slide-exit {
+    @apply animate-out slide-out-to-right-full duration-300;
   }
 }

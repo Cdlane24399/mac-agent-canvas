@@ -57,11 +57,26 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        // AI Tool Colors
+        "ai-glow": "hsl(var(--ai-glow))",
+        "tool-active": "hsl(var(--tool-active))",
+        "tool-inactive": "hsl(var(--tool-inactive))",
+        // Terminal Colors
+        "terminal-bg": "hsl(var(--terminal-bg))",
+        "terminal-text": "hsl(var(--terminal-text))",
+        // Editor Colors
+        "editor-bg": "hsl(var(--editor-bg))",
+        "editor-selection": "hsl(var(--editor-selection))",
+        // Browser Colors
+        "browser-chrome": "hsl(var(--browser-chrome))",
+        "browser-url": "hsl(var(--browser-url))",
       },
       borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
+        lg: "var(--radius-lg)",
+        md: "var(--radius)",
         sm: "calc(var(--radius) - 4px)",
+        "2xl": "1.5rem",
+        "3xl": "2rem",
       },
       keyframes: {
         "accordion-down": {
