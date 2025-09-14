@@ -172,74 +172,76 @@ export default function ChatInterface() {
       </div>
 
       {/* Messages and Tools */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.map((message, index) => (
-          <div key={message.id}>
-            {/* Message */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className={`flex gap-3 ${
-                message.type === 'user' ? 'flex-row-reverse' : 'flex-row'
-              }`}
-            >
-              <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                message.type === 'user' 
-                  ? 'bg-secondary text-secondary-foreground' 
-                  : 'bg-primary text-primary-foreground'
-              }`}>
-                {message.type === 'user' ? (
-                  <User className="w-4 h-4" />
-                ) : (
-                  <Bot className="w-4 h-4" />
-                )}
-              </div>
-              
-              <div className={`flex-1 max-w-[80%] ${
-                message.type === 'user' ? 'text-right' : 'text-left'
-              }`}>
-                <div className={`inline-block p-3 rounded-2xl ${
-                  message.type === 'user'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted text-foreground'
+      <div className="flex-1 overflow-y-auto p-4">
+        <div className="max-w-2xl mx-auto space-y-4">
+          {messages.map((message, index) => (
+            <div key={message.id}>
+              {/* Message */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className={`flex gap-3 ${
+                  message.type === 'user' ? 'flex-row-reverse' : 'flex-row'
+                }`}
+              >
+                <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                  message.type === 'user' 
+                    ? 'bg-secondary text-secondary-foreground' 
+                    : 'bg-primary text-primary-foreground'
                 }`}>
-                  <div className="text-sm leading-relaxed whitespace-pre-wrap">
-                    {message.content}
-                  </div>
+                  {message.type === 'user' ? (
+                    <User className="w-4 h-4" />
+                  ) : (
+                    <Bot className="w-4 h-4" />
+                  )}
                 </div>
                 
-                <div className="text-xs text-muted-foreground mt-1">
-                  {message.timestamp.toLocaleTimeString()}
+                <div className={`flex-1 ${
+                  message.type === 'user' ? 'text-right' : 'text-left'
+                }`}>
+                  <div className={`inline-block p-3 rounded-2xl ${
+                    message.type === 'user'
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-muted text-foreground'
+                  }`}>
+                    <div className="text-sm leading-relaxed whitespace-pre-wrap">
+                      {message.content}
+                    </div>
+                  </div>
+                  
+                  <div className="text-xs text-muted-foreground mt-1">
+                    {message.timestamp.toLocaleTimeString()}
+                  </div>
                 </div>
-              </div>
-            </motion.div>
+              </motion.div>
 
-            {/* Inline Tools for this message */}
-            {activeTools
-              .filter(tool => tool.messageId === message.id)
-              .map(tool => (
-                <InlineToolWrapper
-                  key={tool.id}
-                  title={toolNames[tool.type]}
-                  icon={toolIcons[tool.type]}
-                  onClose={() => closeTool(tool.id)}
-                >
-                  {renderToolComponent(tool)}
-                </InlineToolWrapper>
-              ))}
-          </div>
-        ))}
-        
-        {isProcessing && (
-          <div className="flex gap-3">
-            <div className="w-8 h-8 bg-primary rounded-xl flex items-center justify-center">
-              <Bot className="w-4 h-4 text-primary-foreground" />
+              {/* Inline Tools for this message */}
+              {activeTools
+                .filter(tool => tool.messageId === message.id)
+                .map(tool => (
+                  <InlineToolWrapper
+                    key={tool.id}
+                    title={toolNames[tool.type]}
+                    icon={toolIcons[tool.type]}
+                    onClose={() => closeTool(tool.id)}
+                  >
+                    {renderToolComponent(tool)}
+                  </InlineToolWrapper>
+                ))}
             </div>
-            <AICallout message="Analyzing your request and selecting the best tool..." isThinking />
-          </div>
-        )}
-        
-        <div ref={messagesEndRef} />
+          ))}
+          
+          {isProcessing && (
+            <div className="flex gap-3">
+              <div className="w-8 h-8 bg-primary rounded-xl flex items-center justify-center">
+                <Bot className="w-4 h-4 text-primary-foreground" />
+              </div>
+              <AICallout message="Analyzing your request and selecting the best tool..." isThinking />
+            </div>
+          )}
+          
+          <div ref={messagesEndRef} />
+        </div>
       </div>
 
       {/* Message Input */}
