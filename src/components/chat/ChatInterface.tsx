@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import AICallout from "@/components/ai/AICallout";
 import ToolHeader from "./ToolHeader";
 import ToolPanel from "./ToolPanel";
+import { useAI } from "@/hooks/useAI";
 import type { AIMessage } from "@/types";
 
 interface ActiveTool {
@@ -35,7 +36,7 @@ export default function ChatInterface() {
     {
       id: "1",
       type: "assistant", 
-      content: "Hello! I'm your autonomous AI agent. I can help you complete complex tasks by intelligently using multiple tools in sequence:\n\n🤖 **Agentic Workflows:**\n• Website/App Development - I'll research, code, and test automatically\n• Research Projects - I'll search, browse, compile, and organize information\n• Code Analysis - I'll examine files, analyze code, run diagnostics\n• Deployment Tasks - I'll build, deploy, and verify applications\n\n📋 **Available Tools:**\n🖥️ Terminal | 💻 Code Editor | 🌐 Browser | 🔍 Search | 📁 Files\n\nJust describe what you want to accomplish, and I'll autonomously execute the complete workflow using whatever tools are needed. Try something like:\n• \"Build me a modern website\"\n• \"Research AI development trends\" \n• \"Deploy my application\"\n• \"Analyze my code for issues\"",
+      content: "Hello! I'm your autonomous AI agent with real integrations. I can help you complete complex tasks using live services:\n\n🤖 **Real Service Integrations:**\n• **AI Chat** - Powered by OpenAI GPT models\n• **Web Search** - Live results via Tavily API\n• **Terminal** - Execute real commands with E2B sandboxes\n• **Browser** - Live browser automation with Hyperbrowser\n\n📋 **Available Tools:**\n🖥️ Live Terminal | 🌐 Live Browser | 🔍 Real Search | 💻 Code Editor | 📁 Files\n\nJust describe what you want to accomplish, and I'll use real services to help you. Try something like:\n• \"Search for the latest React tutorials\"\n• \"Run some terminal commands\" \n• \"Browse to GitHub and navigate around\"\n• \"Help me with coding questions\"",
       timestamp: new Date()
     }
   ]);
@@ -45,6 +46,14 @@ export default function ChatInterface() {
   const [currentTool, setCurrentTool] = useState<ActiveTool | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  
+  const [aiResponse, setAiResponse] = useState("");
+  const { sendMessage: sendAIMessage, isLoading: aiLoading, error: aiError } = useAI({
+    streaming: true,
+    onChunk: (chunk: string) => {
+      setAiResponse(prev => prev + chunk);
+    }
+  });
 
   useEffect(() => {
     scrollToBottom();
@@ -68,52 +77,76 @@ export default function ChatInterface() {
     setCurrentMessage("");
     setIsProcessing(true);
 
-    // Simulate AI processing and tool selection
+    // Get AI processing and tool selection
     await simulateAIResponse(currentMessage, userMessage.id);
     setIsProcessing(false);
   };
 
   const simulateAIResponse = async (userInput: string, userMessageId: string) => {
-    // Simulate thinking time
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
     // Determine tool to use based on input
     let toolType: ActiveTool['type'] | null = null;
-    let response = "";
-    
     const lowerInput = userInput.toLowerCase();
 
-    if (lowerInput.includes('terminal') || lowerInput.includes('command') || lowerInput.includes('shell')) {
+    if (lowerInput.includes('terminal') || lowerInput.includes('command') || lowerInput.includes('shell') || lowerInput.includes('run')) {
       toolType = 'terminal';
-      response = "I'll open the terminal for you to execute commands.";
     } else if (lowerInput.includes('code') || lowerInput.includes('edit') || lowerInput.includes('file')) {
       toolType = 'editor';
-      response = "Opening the code editor for you.";
-    } else if (lowerInput.includes('browse') || lowerInput.includes('web') || lowerInput.includes('website')) {
+    } else if (lowerInput.includes('browse') || lowerInput.includes('web') || lowerInput.includes('website') || lowerInput.includes('browser')) {
       toolType = 'browser';
-      response = "Let me open the web browser for you.";
-    } else if (lowerInput.includes('search')) {
+    } else if (lowerInput.includes('search') || lowerInput.includes('find') || lowerInput.includes('look up')) {
       toolType = 'search';
-      response = "I'll help you search for information.";
     } else if (lowerInput.includes('folder') || lowerInput.includes('directory') || lowerInput.includes('files')) {
       toolType = 'files';
-      response = "Opening the file manager for you.";
-    } else {
-      response = `I understand you want help with: "${userInput}". I can use various tools to assist you:\n\n• **Terminal** - for running commands\n• **Editor** - for coding and file editing\n• **Browser** - for web browsing\n• **Search** - for finding information\n• **Files** - for file management\n\nWhich tool would you like me to open?`;
     }
 
+    // Get AI response using real AI service
+    setAiResponse("");
     const aiMessageId = (Date.now() + 1).toString();
     
-    // Add AI response
+    // Create placeholder message for streaming
     const aiMessage: AIMessage = {
       id: aiMessageId,
       type: "assistant",
-      content: response,
+      content: "",
       toolId: toolType || undefined,
       timestamp: new Date()
     };
 
     setMessages(prev => [...prev, aiMessage]);
+
+    try {
+      // Send message to AI with context about available tools
+      const systemMessage = {
+        role: 'system' as const,
+        content: `You are an autonomous AI agent with access to real tools: Terminal (E2B), Web Search (Tavily), Browser Automation (Hyperbrowser), Code Editor, and File Manager. When users ask for help, you can suggest using these tools and provide helpful responses. Be concise but informative.`
+      };
+
+      const userMessage = {
+        role: 'user' as const,
+        content: userInput
+      };
+
+      await sendAIMessage([systemMessage, userMessage]);
+      
+      // Update the message with the complete response
+      setMessages(prev => prev.map(msg => 
+        msg.id === aiMessageId 
+          ? { ...msg, content: aiResponse }
+          : msg
+      ));
+
+    } catch (error) {
+      console.error('AI response error:', error);
+      const fallbackResponse = toolType 
+        ? `I'll open the ${toolNames[toolType]} tool for you.`
+        : `I can help you with that. I have access to several tools including Terminal, Browser, Search, Code Editor, and File Manager. What would you like me to do?`;
+        
+      setMessages(prev => prev.map(msg => 
+        msg.id === aiMessageId 
+          ? { ...msg, content: fallbackResponse }
+          : msg
+      ));
+    }
 
     // Add tool if needed
     if (toolType) {
