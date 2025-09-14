@@ -47,11 +47,23 @@ export default function ChatInterface() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   
-  const [aiResponse, setAiResponse] = useState("");
+  // AI streaming state
+  const currentAIMessageId = useRef<string | null>(null);
+  const accumulatedResponse = useRef<string>("");
+  
   const { sendMessage: sendAIMessage, isLoading: aiLoading, error: aiError } = useAI({
     streaming: true,
     onChunk: (chunk: string) => {
-      setAiResponse(prev => prev + chunk);
+      accumulatedResponse.current += chunk;
+      
+      // Update the message in real-time as chunks come in
+      if (currentAIMessageId.current) {
+        setMessages(prev => prev.map(msg => 
+          msg.id === currentAIMessageId.current 
+            ? { ...msg, content: accumulatedResponse.current }
+            : msg
+        ));
+      }
     }
   });
 
@@ -66,6 +78,8 @@ export default function ChatInterface() {
   const sendMessage = async () => {
     if (!currentMessage.trim() || isProcessing) return;
 
+    console.log('ChatInterface: Sending message:', currentMessage);
+
     const userMessage: AIMessage = {
       id: Date.now().toString(),
       type: "user",
@@ -77,12 +91,16 @@ export default function ChatInterface() {
     setCurrentMessage("");
     setIsProcessing(true);
 
+    console.log('ChatInterface: Starting AI response processing...');
     // Get AI processing and tool selection
     await simulateAIResponse(currentMessage, userMessage.id);
     setIsProcessing(false);
+    console.log('ChatInterface: AI response processing completed');
   };
 
   const simulateAIResponse = async (userInput: string, userMessageId: string) => {
+    console.log('ChatInterface: simulateAIResponse called with:', userInput);
+    
     // Determine tool to use based on input
     let toolType: ActiveTool['type'] | null = null;
     const lowerInput = userInput.toLowerCase();
@@ -99,9 +117,14 @@ export default function ChatInterface() {
       toolType = 'files';
     }
 
+    console.log('ChatInterface: Selected tool type:', toolType);
+
     // Get AI response using real AI service
-    setAiResponse("");
     const aiMessageId = (Date.now() + 1).toString();
+    currentAIMessageId.current = aiMessageId;
+    accumulatedResponse.current = "";
+    
+    console.log('ChatInterface: Creating AI message with ID:', aiMessageId);
     
     // Create placeholder message for streaming
     const aiMessage: AIMessage = {
@@ -115,6 +138,8 @@ export default function ChatInterface() {
     setMessages(prev => [...prev, aiMessage]);
 
     try {
+      console.log('ChatInterface: Calling AI service...');
+      
       // Send message to AI with context about available tools
       const systemMessage = {
         role: 'system' as const,
@@ -127,29 +152,32 @@ export default function ChatInterface() {
       };
 
       await sendAIMessage([systemMessage, userMessage]);
-      
-      // Update the message with the complete response
-      setMessages(prev => prev.map(msg => 
-        msg.id === aiMessageId 
-          ? { ...msg, content: aiResponse }
-          : msg
-      ));
+      console.log('ChatInterface: AI service call completed');
 
     } catch (error) {
-      console.error('AI response error:', error);
+      console.error('ChatInterface: AI response error:', error);
       const fallbackResponse = toolType 
         ? `I'll open the ${toolNames[toolType]} tool for you.`
         : `I can help you with that. I have access to several tools including Terminal, Browser, Search, Code Editor, and File Manager. What would you like me to do?`;
         
+      console.log('ChatInterface: Using fallback response:', fallbackResponse);
+      
+      // Update message with fallback response
       setMessages(prev => prev.map(msg => 
         msg.id === aiMessageId 
           ? { ...msg, content: fallbackResponse }
           : msg
       ));
+    } finally {
+      // Clean up refs
+      currentAIMessageId.current = null;
+      accumulatedResponse.current = "";
+      console.log('ChatInterface: Cleaned up AI response refs');
     }
 
     // Add tool if needed
     if (toolType) {
+      console.log('ChatInterface: Adding tool:', toolType);
       const newTool: ActiveTool = {
         id: Date.now().toString() + toolType,
         type: toolType,

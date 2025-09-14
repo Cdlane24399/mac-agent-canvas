@@ -21,21 +21,31 @@ export class AIService {
   }
 
   async sendMessage(messages: ChatMessage[]): Promise<AIServiceResponse> {
+    console.log('AIService: sendMessage called with', messages.length, 'messages');
+    
     try {
+      console.log('AIService: Invoking ai-chat function...');
+      
       const { data, error } = await supabase.functions.invoke('ai-chat', {
         body: { messages, stream: false }
       });
 
+      console.log('AIService: Function response:', { data, error });
+
       if (error) {
-        console.error('AI service error:', error);
+        console.error('AIService: AI service error:', error);
         throw new Error(error.message || 'Failed to get AI response');
       }
 
-      return {
+      const response = {
         content: data.choices[0]?.message?.content || 'No response received',
       };
+      
+      console.log('AIService: Returning response:', response);
+      return response;
+      
     } catch (error) {
-      console.error('Error calling AI service:', error);
+      console.error('AIService: Error calling AI service:', error);
       return {
         content: '',
         error: error instanceof Error ? error.message : 'Unknown error occurred',
