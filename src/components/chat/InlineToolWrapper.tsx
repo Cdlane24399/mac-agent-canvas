@@ -62,11 +62,9 @@ export default function InlineToolWrapper({
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="border border-border rounded-xl overflow-hidden bg-card shadow-sm"
+          className="overflow-hidden"
         >
-          <div className="p-3 max-h-64 overflow-hidden">
-            {children}
-          </div>
+          {children}
         </motion.div>
       </motion.div>
     </div>
