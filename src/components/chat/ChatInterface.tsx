@@ -1,0 +1,277 @@
+import { useState, useRef, useEffect } from "react";
+import { motion } from "framer-motion";
+import { Send, Bot, User, Terminal, Code, Globe, Search, FileText } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import AICallout from "@/components/ai/AICallout";
+import InlineToolWrapper from "./InlineToolWrapper";
+import TerminalTool from "@/components/tools/TerminalTool";
+import EditorTool from "@/components/tools/EditorTool";
+import BrowserTool from "@/components/tools/BrowserTool";
+import SearchTool from "@/components/tools/SearchTool";
+import FilesTool from "@/components/tools/FilesTool";
+import type { AIMessage } from "@/types";
+
+interface ActiveTool {
+  id: string;
+  type: 'terminal' | 'editor' | 'browser' | 'search' | 'files';
+  messageId: string;
+}
+
+const toolIcons = {
+  terminal: <Terminal className="w-4 h-4 text-primary" />,
+  editor: <Code className="w-4 h-4 text-primary" />,
+  browser: <Globe className="w-4 h-4 text-primary" />,
+  search: <Search className="w-4 h-4 text-primary" />,
+  files: <FileText className="w-4 h-4 text-primary" />
+};
+
+const toolNames = {
+  terminal: "Terminal",
+  editor: "Code Editor", 
+  browser: "Web Browser",
+  search: "Web Search",
+  files: "File Manager"
+};
+
+export default function ChatInterface() {
+  const [messages, setMessages] = useState<AIMessage[]>([
+    {
+      id: "1",
+      type: "assistant", 
+      content: "Hello! I'm your AI assistant with integrated tools. I can help you with:\n\n🖥️ **Terminal** - Execute commands\n💻 **Code Editor** - Edit files and code\n🌐 **Web Browser** - Browse websites\n🔍 **Web Search** - Search for information\n📁 **File Manager** - Manage your files\n\nJust tell me what you'd like to do and I'll open the appropriate tool for you!",
+      timestamp: new Date()
+    }
+  ]);
+  const [currentMessage, setCurrentMessage] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [activeTools, setActiveTools] = useState<ActiveTool[]>([]);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, activeTools]);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const sendMessage = async () => {
+    if (!currentMessage.trim() || isProcessing) return;
+
+    const userMessage: AIMessage = {
+      id: Date.now().toString(),
+      type: "user",
+      content: currentMessage,
+      timestamp: new Date()
+    };
+
+    setMessages(prev => [...prev, userMessage]);
+    setCurrentMessage("");
+    setIsProcessing(true);
+
+    // Simulate AI processing and tool selection
+    await simulateAIResponse(currentMessage, userMessage.id);
+    setIsProcessing(false);
+  };
+
+  const simulateAIResponse = async (userInput: string, userMessageId: string) => {
+    // Simulate thinking time
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // Determine tool to use based on input
+    let toolType: ActiveTool['type'] | null = null;
+    let response = "";
+    
+    const lowerInput = userInput.toLowerCase();
+
+    if (lowerInput.includes('terminal') || lowerInput.includes('command') || lowerInput.includes('shell')) {
+      toolType = 'terminal';
+      response = "I'll open the terminal for you to execute commands.";
+    } else if (lowerInput.includes('code') || lowerInput.includes('edit') || lowerInput.includes('file')) {
+      toolType = 'editor';
+      response = "Opening the code editor for you.";
+    } else if (lowerInput.includes('browse') || lowerInput.includes('web') || lowerInput.includes('website')) {
+      toolType = 'browser';
+      response = "Let me open the web browser for you.";
+    } else if (lowerInput.includes('search')) {
+      toolType = 'search';
+      response = "I'll help you search for information.";
+    } else if (lowerInput.includes('folder') || lowerInput.includes('directory') || lowerInput.includes('files')) {
+      toolType = 'files';
+      response = "Opening the file manager for you.";
+    } else {
+      response = `I understand you want help with: "${userInput}". I can use various tools to assist you:\n\n• **Terminal** - for running commands\n• **Editor** - for coding and file editing\n• **Browser** - for web browsing\n• **Search** - for finding information\n• **Files** - for file management\n\nWhich tool would you like me to open?`;
+    }
+
+    const aiMessageId = (Date.now() + 1).toString();
+    
+    // Add AI response
+    const aiMessage: AIMessage = {
+      id: aiMessageId,
+      type: "assistant",
+      content: response,
+      toolId: toolType || undefined,
+      timestamp: new Date()
+    };
+
+    setMessages(prev => [...prev, aiMessage]);
+
+    // Add tool if needed
+    if (toolType) {
+      const newTool: ActiveTool = {
+        id: Date.now().toString() + toolType,
+        type: toolType,
+        messageId: aiMessageId
+      };
+      
+      setActiveTools(prev => [...prev, newTool]);
+    }
+  };
+
+  const closeTool = (toolId: string) => {
+    setActiveTools(prev => prev.filter(tool => tool.id !== toolId));
+  };
+
+  const renderToolComponent = (tool: ActiveTool) => {
+    const commonProps = {
+      isActive: true,
+      onMessage: undefined
+    };
+
+    switch (tool.type) {
+      case 'terminal':
+        return <TerminalTool {...commonProps} />;
+      case 'editor':
+        return <EditorTool {...commonProps} />;
+      case 'browser':
+        return <BrowserTool {...commonProps} />;
+      case 'search':
+        return <SearchTool {...commonProps} />;
+      case 'files':
+        return <FilesTool {...commonProps} />;
+      default:
+        return null;
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  };
+
+  return (
+    <div className="flex flex-col h-full">
+      {/* Chat Header */}
+      <div className="flex items-center gap-3 p-4 border-b border-border">
+        <div className="w-10 h-10 bg-primary rounded-2xl flex items-center justify-center">
+          <Bot className="w-6 h-6 text-primary-foreground" />
+        </div>
+        <div>
+          <h1 className="font-semibold text-foreground">AI Assistant</h1>
+          <p className="text-sm text-muted-foreground">with Integrated Tools</p>
+        </div>
+      </div>
+
+      {/* Messages and Tools */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {messages.map((message, index) => (
+          <div key={message.id}>
+            {/* Message */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className={`flex gap-3 ${
+                message.type === 'user' ? 'flex-row-reverse' : 'flex-row'
+              }`}
+            >
+              <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                message.type === 'user' 
+                  ? 'bg-secondary text-secondary-foreground' 
+                  : 'bg-primary text-primary-foreground'
+              }`}>
+                {message.type === 'user' ? (
+                  <User className="w-4 h-4" />
+                ) : (
+                  <Bot className="w-4 h-4" />
+                )}
+              </div>
+              
+              <div className={`flex-1 max-w-[80%] ${
+                message.type === 'user' ? 'text-right' : 'text-left'
+              }`}>
+                <div className={`inline-block p-3 rounded-2xl ${
+                  message.type === 'user'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted text-foreground'
+                }`}>
+                  <div className="text-sm leading-relaxed whitespace-pre-wrap">
+                    {message.content}
+                  </div>
+                </div>
+                
+                <div className="text-xs text-muted-foreground mt-1">
+                  {message.timestamp.toLocaleTimeString()}
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Inline Tools for this message */}
+            {activeTools
+              .filter(tool => tool.messageId === message.id)
+              .map(tool => (
+                <InlineToolWrapper
+                  key={tool.id}
+                  title={toolNames[tool.type]}
+                  icon={toolIcons[tool.type]}
+                  onClose={() => closeTool(tool.id)}
+                >
+                  {renderToolComponent(tool)}
+                </InlineToolWrapper>
+              ))}
+          </div>
+        ))}
+        
+        {isProcessing && (
+          <div className="flex gap-3">
+            <div className="w-8 h-8 bg-primary rounded-xl flex items-center justify-center">
+              <Bot className="w-4 h-4 text-primary-foreground" />
+            </div>
+            <AICallout message="Analyzing your request and selecting the best tool..." isThinking />
+          </div>
+        )}
+        
+        <div ref={messagesEndRef} />
+      </div>
+
+      {/* Message Input */}
+      <div className="p-4 border-t border-border">
+        <div className="flex items-end gap-2">
+          <div className="flex-1">
+            <Textarea
+              ref={textareaRef}
+              value={currentMessage}
+              onChange={(e) => setCurrentMessage(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Ask me to open a tool or help with a task..."
+              disabled={isProcessing}
+              className="min-h-[60px] max-h-32 resize-none bg-muted border-border"
+              rows={2}
+            />
+          </div>
+          <Button 
+            onClick={sendMessage}
+            disabled={!currentMessage.trim() || isProcessing}
+            size="lg"
+            className="h-[60px] px-4"
+          >
+            <Send className="w-4 h-4" />
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
